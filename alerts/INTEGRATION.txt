@@ -1,0 +1,80 @@
+# Person 4 Integration Guide
+
+Person 4 provides the alert/action layer. Do not replace the existing frontend, backend, or risk engine.
+
+## 1. Add the alert banner
+
+In the main React dashboard, import:
+
+```js
+import Person4AlertBanner from './person4/Person4AlertBanner'
+```
+
+Then render:
+
+```jsx
+<Person4AlertBanner weather={weather} />
+```
+
+Place it near the top of the dashboard so high-risk warnings are visible.
+
+## 2. Optional browser notification
+
+Import:
+
+```js
+import { evaluateAlert, sendBrowserAlert } from './person4/alertEngine'
+```
+
+When new risk data arrives, call `evaluateAlert(data)`. Trigger `sendBrowserAlert(alert)` only when the alert changes into `high` or `extreme`, rather than on every refresh.
+
+## 3. Person 2 risk-engine response
+
+Use:
+
+```js
+import { adaptRiskEngineResponse } from './person4/riskEngineAdapter'
+```
+
+Expected shared response shape:
+
+```json
+{
+  "location": { "name": "Chennai", "lat": 13.08, "lon": 80.27 },
+  "timestamp": "2026-09-27T10:00:00Z",
+  "environment": {
+    "temperature": 39,
+    "humidity": 70,
+    "wind_speed": 8,
+    "solar_exposure": 8
+  },
+  "risk": {
+    "score": 82,
+    "category": "Extreme",
+    "factors": [],
+    "explanation": "High heat conditions"
+  },
+  "recommendations": ["Stay hydrated", "Avoid prolonged outdoor exposure"]
+}
+```
+
+The adapter converts this into the alert layer's common format.
+
+## 4. Alert thresholds
+
+Default thresholds are centralized in `src/person4/alertEngine.js`:
+
+- High score: >= 50
+- Extreme score: >= 75
+- High heat index: >= 39.4 C
+- Extreme heat index: >= 51.7 C
+
+These are configurable by passing a threshold object to `evaluateAlert()`.
+
+## 5. Security
+
+- Never hard-code API keys.
+- Keep private credentials in environment variables/backend configuration.
+- Validate API input before passing it to the risk engine.
+- Do not inject untrusted alert content as raw HTML.
+- Use HTTPS when deployed.

@@ -1,0 +1,78 @@
+{
+  "score_categories": {
+    "low": {
+      "name": "Low",
+      "min": 0.0,
+      "max": 24.99
+    },
+    "moderate": {
+      "name": "Moderate",
+      "min": 25.0,
+      "max": 49.99
+    },
+    "high": {
+      "name": "High",
+      "min": 50.0,
+      "max": 74.99
+    },
+    "extreme": {
+      "name": "Extreme",
+      "min": 75.0,
+      "max": 100.0
+    }
+  },
+  "weights": {
+    "heat_index": 0.55,
+    "humidity": 0.15,
+    "wind": 0.10,
+    "solar": 0.20
+  },
+  "solar_mapping": {
+    "shaded": 0.0,
+    "partial": 0.5,
+    "full_sun": 1.0
+  },
+  "solar_default": 0.5,
+  "wind_adjustment": {
+    "calm_threshold_kmh": 5.0,
+    "moderate_threshold_kmh": 20.0,
+    "stagnant_penalty": 15.0,
+    "breeze_relief_max": 25.0
+  },
+  "time_adjustment": {
+    "enabled": true,
+    "peak_start_hour": 11,
+    "peak_end_hour": 16,
+    "peak_multiplier": 1.08,
+    "night_start_hour": 20,
+    "night_end_hour": 6,
+    "night_multiplier": 0.92
+  },
+  "heat_index_parameters": {
+    "nws_min_temp_c": 26.67,
+    "nws_min_humidity": 40.0,
+    "min_reference_c": 15.0,
+    "max_reference_c": 50.0
+  },
+  "recommendations": {
+    "low": [
+      "Conditions are comfortable for outdoor activities.",
+      "Maintain standard daily hydration."
+    ],
+    "moderate": [
+      "Take periodic breaks in shaded areas if working outdoors.",
+      "Stay hydrated and monitor ambient conditions."
+    ],
+    "high": [
+      "Limit continuous direct sun exposure during peak afternoon hours.",
+      "Schedule strenuous physical labor for cooler morning or evening periods.",
+      "Ensure accessible shaded rest stations and adequate water intake."
+    ],
+    "extreme": [
+      "Avoid non-essential outdoor heat exposure during peak radiation hours.",
+      "Implement frequent shaded rest cycles for mandatory outdoor operations.",
+      "Maximize airflow and seek active cooling environments."
+    ]
+  },
+  "disclaimer": "This score is an environmental heat-exposure risk indicator. It is not a medical diagnostic tool and does not predict individual medical outcomes."
+}

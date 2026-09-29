@@ -1,0 +1,2 @@
+# Dependencies are maintained in the repository root requirements.txt
+-r ../requirements.txt

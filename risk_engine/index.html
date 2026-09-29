@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeatShield | Environmental Heat-Risk Engine Console</title>
+  <meta name="description" content="Interactive testing and evaluation console for the HeatShield Person 2 Heat-Risk Engine. Assess environmental heat-exposure risk with live factors and explanations.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0e17;
+      --bg-card: rgba(18, 26, 43, 0.75);
+      --bg-card-hover: rgba(25, 36, 60, 0.85);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #f97316;
+      --primary: #f97316;
+      --primary-glow: rgba(249, 115, 22, 0.25);
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      
+      --cat-low: #10b981;
+      --cat-low-glow: rgba(16, 185, 129, 0.2);
+      --cat-moderate: #f59e0b;
+      --cat-moderate-glow: rgba(245, 158, 11, 0.2);
+      --cat-high: #f97316;
+      --cat-high-glow: rgba(249, 115, 22, 0.25);
+      --cat-extreme: #ef4444;
+      --cat-extreme-glow: rgba(239, 68, 68, 0.35);
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(249, 115, 22, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
+        linear-gradient(to bottom, #0a0e17, #06090e);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(10, 14, 23, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 20px var(--primary-glow);
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: #fff;
+    }
+
+    .brand-text h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(249, 115, 22, 0.15);
+      color: #fb923c;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .brand-desc {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge-status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      padding: 6px 12px;
+      border-radius: 20px;
+    }
+
+    .badge-status::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+    }
+
+    .api-link {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .api-link:hover {
+      color: var(--primary);
+    }
+
+    main {
+      flex: 1;
+      max-width: 1320px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 24px;
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .preset-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn-preset {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-preset:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .form-val-display {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 90px;
+      gap: 12px;
+    }
+
+    input[type="number"], select, input[type="text"], input[type="datetime-local"] {
+      width: 100%;
+      background: rgba(10, 14, 23, 0.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: #fff;
+      padding: 10px 14px;
+      font-family: var(--font-sans);
+      font-size: 0.92rem;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      margin: 10px 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px var(--primary-glow);
+      transition: transform 0.1s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .segmented-control {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: rgba(10, 14, 23, 0.7);
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+
+    .segment-opt {
+      text-align: center;
+      padding: 8px 10px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-dim);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .segment-opt.active {
+      background: rgba(249, 115, 22, 0.15);
+      color: #fb923c;
+      font-weight: 600;
+      border: 1px solid rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-calc {
+      width: 100%;
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      border: none;
+      color: #fff;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.96rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 4px 20px var(--primary-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-calc:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(249, 115, 22, 0.4);
+    }
+
+    .btn-calc:active {
+      transform: translateY(0);
+    }
+
+    /* Output View */
+    .results-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-score-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 32px;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (max-width: 640px) {
+      .hero-score-card {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+    }
+
+    .score-circle-container {
+      position: relative;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+    }
+
+    .score-circle-svg {
+      transform: rotate(-90deg);
+      width: 180px;
+      height: 180px;
+    }
+
+    .score-circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.06);
+      stroke-width: 14;
+    }
+
+    .score-circle-bar {
+      fill: none;
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 471;
+      stroke-dashoffset: 471;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s;
+    }
+
+    .score-circle-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .score-number {
+      font-family: var(--font-mono);
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .score-scale {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .hero-meta h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .category-badge-lg {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 30px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .hero-explanation {
+      font-size: 1.05rem;
+      color: #e2e8f0;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .factors-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .factors-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .factor-item {
+      background: rgba(10, 14, 23, 0.5);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.2s;
+    }
+
+    .factor-item:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .factor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .factor-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+
+    .factor-impact {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .factor-progress-bg {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .factor-progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.6s ease;
+    }
+
+    .factor-val {
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    /* JSON Drawer */
+    .json-panel {
+      margin-top: 8px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: rgba(10, 14, 23, 0.6);
+      overflow: hidden;
+    }
+
+    .json-header {
+      padding: 12px 18px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .json-header h3 {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-copy {
+      background: none;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .btn-copy:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    pre code {
+      display: block;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    /* Safety Banner */
+    .safety-disclaimer {
+      margin-top: 24px;
+      padding: 16px 20px;
+      background: rgba(249, 115, 22, 0.05);
+      border-left: 3px solid #f97316;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="nav-container">
+      <a href="#" class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>HeatShield <span class="brand-tag">Person 2 Engine</span></h1>
+          <div class="brand-desc">Environmental Heat-Exposure Risk Engine & Simulator</div>
+        </div>
+      </a>
+      <div class="header-badges">
+        <div class="badge-status">Engine Ready (v1.0)</div>
+        <a href="/docs" target="_blank" class="api-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          API Docs
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Controls Column -->
+    <section class="card">
+      <div class="card-title">
+        <span>Environmental Inputs</span>
+      </div>
+
+      <div class="preset-buttons">
+        <button class="btn-preset" onclick="setPreset('mild')">Pleasant</button>
+        <button class="btn-preset" onclick="setPreset('moderate')">Warm</button>
+        <button class="btn-preset" onclick="setPreset('high')">High Risk</button>
+        <button class="btn-preset" onclick="setPreset('extreme')">Extreme Wave</button>
+      </div>
+
+      <form id="riskForm" onsubmit="event.preventDefault(); evaluateRisk();">
+        <!-- Temperature -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Ambient Temperature</span>
+            <span class="form-val-display" id="tempDisplay">34°C</span>
+          </div>
+          <div class="input-row">
+            <input type="range" id="tempSlider" min="10" max="50" step="0.5" value="34" oninput="syncTemp(this.value)">
+            <select id="tempUnit" onchange="toggleUnit(this.value)">
+              <option value="C" selected>°C</option>
+              <option value="F">°F</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Relative Humidity -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Relative Humidity</span>
+            <span class="form-val-display" id="humidityDisplay">65%</span>
+          </div>
+          <input type="range" id="humiditySlider" min="5" max="100" step="1" value="65" oninput="syncVal('humidityDisplay', this.value + '%')">
+        </div>
+
+        <!-- Wind Speed -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Wind Speed</span>
+            <span class="form-val-display" id="windDisplay">12 km/h</span>
+          </div>
+          <div class="input-row">
+            <input type="range" id="windSlider" min="0" max="60" step="1" value="12" oninput="syncVal('windDisplay', this.value + ' km/h')">
+            <select id="windUnit">
+              <option value="km/h" selected>km/h</option>
+              <option value="m/s">m/s</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Solar Exposure -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Solar Radiation Exposure</span>
+          </div>
+          <div class="segmented-control" id="solarSegments">
+            <div class="segment-opt" onclick="setSolar('shaded', 0.0)">Shaded</div>
+            <div class="segment-opt active" onclick="setSolar('partial', 0.5)">Partial</div>
+            <div class="segment-opt" onclick="setSolar('full_sun', 1.0)">Full Sun</div>
+          </div>
+          <input type="hidden" id="solarVal" value="0.5">
+        </div>
+
+        <!-- Optional Location -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Location Context (Optional)</span>
+          </div>
+          <input type="text" id="locName" placeholder="e.g. Chennai, Tamil Nadu" value="Chennai">
+        </div>
+
+        <!-- Optional Timestamp -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Observation Time (Optional)</span>
+          </div>
+          <input type="datetime-local" id="timeVal">
+        </div>
+
+        <button type="submit" class="btn-calc" id="btnSubmit">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          Compute Heat-Risk Score
+        </button>
+      </form>
+    </section>
+
+    <!-- Results Column -->
+    <section class="results-container">
+      <!-- Main Metric Display -->
+      <div class="hero-score-card" id="heroCard">
+        <div class="score-circle-container">
+          <svg class="score-circle-svg" viewBox="0 0 180 180">
+            <circle class="score-circle-bg" cx="90" cy="90" r="75"></circle>
+            <circle class="score-circle-bar" id="scoreBar" cx="90" cy="90" r="75"></circle>
+          </svg>
+          <div class="score-circle-inner">
+            <div class="score-number" id="scoreNum">--</div>
+            <div class="score-scale">RISK INDEX (0-100)</div>
+          </div>
+        </div>
+
+        <div class="hero-meta">
+          <h2>Environmental Assessment</h2>
+          <div class="category-badge-lg" id="catBadge">Calculating...</div>
+          <p class="hero-explanation" id="explanationText">Adjust environmental sliders and run the risk calculation engine.</p>
+        </div>
+      </div>
+
+      <!-- Ranked Factors Breakdown -->
+      <div class="card">
+        <div class="card-title">
+          <span>Ranked Environmental Drivers</span>
+          <span style="font-size: 0.8rem; color: var(--text-dim); font-weight: 500;">Relative Impact</span>
+        </div>
+        <div class="factors-grid" id="factorsContainer">
+          <!-- Dynamically injected -->
+        </div>
+      </div>
+
+      <!-- JSON Contract Inspector -->
+      <div class="json-panel">
+        <div class="json-header" onclick="toggleJson()">
+          <h3>JSON Contract Payload (Person 3 Interop)</h3>
+          <button class="btn-copy" onclick="event.stopPropagation(); copyJson();">Copy JSON</button>
+        </div>
+        <pre><code id="jsonCode">// JSON response contract will appear here...</code></pre>
+      </div>
+
+      <!-- Safety Limitation -->
+      <div class="safety-disclaimer">
+        <strong>Safety Limitation:</strong> This engine evaluates ambient meteorological heat distress only. It is strictly an environmental heat-exposure risk indicator and not a medical diagnostic tool.
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    HeatShield Multi-Person Architecture &bull; Person 2 Heat-Risk Engine Module &bull; Independent Python interop verified
+  </footer>
+
+  <script>
+    let currentSolar = 0.5;
+
+    function initTime() {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('timeVal').value = now.toISOString().slice(0,16);
+    }
+
+    function syncVal(id, text) {
+      document.getElementById(id).innerText = text;
+    }
+
+    function syncTemp(val) {
+      const unit = document.getElementById('tempUnit').value;
+      document.getElementById('tempDisplay').innerText = val + '°' + unit;
+    }
+
+    function toggleUnit(unit) {
+      const slider = document.getElementById('tempSlider');
+      if (unit === 'F') {
+        slider.min = 50;
+        slider.max = 125;
+        slider.value = Math.round((slider.value * 9/5) + 32);
+      } else {
+        slider.min = 10;
+        slider.max = 50;
+        slider.value = Math.round((slider.value - 32) * 5/9);
+      }
+      syncTemp(slider.value);
+    }
+
+    function setSolar(cat, val) {
+      currentSolar = val;
+      document.getElementById('solarVal').value = val;
+      const opts = document.querySelectorAll('.segment-opt');
+      opts.forEach(el => el.classList.remove('active'));
+      if (cat === 'shaded') opts[0].classList.add('active');
+      if (cat === 'partial') opts[1].classList.add('active');
+      if (cat === 'full_sun') opts[2].classList.add('active');
+    }
+
+    function setPreset(level) {
+      const unit = document.getElementById('tempUnit').value;
+      if (level === 'mild') {
+        document.getElementById('tempSlider').value = unit === 'C' ? 22 : 72;
+        document.getElementById('humiditySlider').value = 40;
+        document.getElementById('windSlider').value = 18;
+        setSolar('shaded', 0.0);
+      } else if (level === 'moderate') {
+        document.getElementById('tempSlider').value = unit === 'C' ? 28 : 82;
+        document.getElementById('humiditySlider').value = 50;
+        document.getElementById('windSlider').value = 12;
+        setSolar('partial', 0.5);
+      } else if (level === 'high') {
+        document.getElementById('tempSlider').value = unit === 'C' ? 34 : 93;
+        document.getElementById('humiditySlider').value = 65;
+        document.getElementById('windSlider').value = 8;
+        setSolar('partial', 0.5);
+      } else if (level === 'extreme') {
+        document.getElementById('tempSlider').value = unit === 'C' ? 42 : 108;
+        document.getElementById('humiditySlider').value = 75;
+        document.getElementById('windSlider').value = 4;
+        setSolar('full_sun', 1.0);
+      }
+      syncTemp(document.getElementById('tempSlider').value);
+      syncVal('humidityDisplay', document.getElementById('humiditySlider').value + '%');
+      syncVal('windDisplay', document.getElementById('windSlider').value + ' km/h');
+      evaluateRisk();
+    }
+
+    async function evaluateRisk() {
+      const temp = parseFloat(document.getElementById('tempSlider').value);
+      const tempUnit = document.getElementById('tempUnit').value;
+      const humidity = parseFloat(document.getElementById('humiditySlider').value);
+      const wind = parseFloat(document.getElementById('windSlider').value);
+      const windUnit = document.getElementById('windUnit').value;
+      const locName = document.getElementById('locName').value.trim();
+      const timeStr = document.getElementById('timeVal').value;
+
+      const payload = {
+        temperature: temp,
+        temperature_unit: tempUnit,
+        relative_humidity: humidity,
+        wind_speed: wind,
+        wind_unit: windUnit,
+        solar_exposure: currentSolar
+      };
+
+      if (locName) {
+        payload.location = { name: locName };
+      }
+      if (timeStr) {
+        payload.timestamp = new Date(timeStr).toISOString();
+      }
+
+      try {
+        const res = await fetch('/api/risk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          alert('Validation Error: ' + JSON.stringify(err));
+          return;
+        }
+
+        const data = await res.json();
+        renderResult(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function renderResult(data) {
+      const risk = data.risk;
+      const score = risk.score;
+      const category = risk.category;
+
+      document.getElementById('scoreNum').innerText = score;
+      document.getElementById('explanationText').innerText = risk.explanation;
+
+      // Circle progress calculation (circumference = 2 * PI * 75 ≈ 471)
+      const circumference = 471;
+      const offset = circumference - (score / 100) * circumference;
+      const circleBar = document.getElementById('scoreBar');
+      circleBar.style.strokeDashoffset = offset;
+
+      // Color scheme according to risk category
+      let strokeColor = '#10b981';
+      let badgeBg = 'rgba(16, 185, 129, 0.15)';
+      let badgeBorder = 'rgba(16, 185, 129, 0.3)';
+
+      if (category === 'Moderate') {
+        strokeColor = '#f59e0b';
+        badgeBg = 'rgba(245, 158, 11, 0.15)';
+        badgeBorder = 'rgba(245, 158, 11, 0.3)';
+      } else if (category === 'High') {
+        strokeColor = '#f97316';
+        badgeBg = 'rgba(249, 115, 22, 0.15)';
+        badgeBorder = 'rgba(249, 115, 22, 0.3)';
+      } else if (category === 'Extreme') {
+        strokeColor = '#ef4444';
+        badgeBg = 'rgba(239, 68, 68, 0.2)';
+        badgeBorder = 'rgba(239, 68, 68, 0.4)';
+      }
+
+      circleBar.style.stroke = strokeColor;
+      const badge = document.getElementById('catBadge');
+      badge.innerText = category + ' Risk';
+      badge.style.color = strokeColor;
+      badge.style.background = badgeBg;
+      badge.style.border = '1px solid ' + badgeBorder;
+
+      // Factors rendering
+      const container = document.getElementById('factorsContainer');
+      container.innerHTML = '';
+
+      risk.factors.forEach(f => {
+        let impactColor = '#10b981';
+        let impactBg = 'rgba(16, 185, 129, 0.15)';
+        if (f.impact === 'moderate') {
+          impactColor = '#f59e0b';
+          impactBg = 'rgba(245, 158, 11, 0.15)';
+        } else if (f.impact === 'high') {
+          impactColor = '#ef4444';
+          impactBg = 'rgba(239, 68, 68, 0.15)';
+        }
+
+        const item = document.createElement('div');
+        item.className = 'factor-item';
+        item.innerHTML = `
+          <div class="factor-header">
+            <span class="factor-name">${f.factor.replace('_', ' ')}</span>
+            <span class="factor-impact" style="color: ${impactColor}; background: ${impactBg}">${f.impact}</span>
+          </div>
+          <div class="factor-progress-bg">
+            <div class="factor-progress-fill" style="width: ${Math.min(100, f.contribution * 1.8)}%; background: ${impactColor}"></div>
+          </div>
+          <div class="factor-val">+${f.contribution.toFixed(1)} score impact</div>
+        `;
+        container.appendChild(item);
+      });
+
+      // Update JSON block
+      document.getElementById('jsonCode').innerText = JSON.stringify(data, null, 2);
+    }
+
+    function copyJson() {
+      const code = document.getElementById('jsonCode').innerText;
+      navigator.clipboard.writeText(code);
+      alert('JSON output contract copied to clipboard!');
+    }
+
+    window.onload = () => {
+      initTime();
+      evaluateRisk();
+    };
+  </script>
+</body>
+</html>
